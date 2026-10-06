@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Alumno</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; }
+    input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; background: #ffc107; color: #333; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .btn-search { background: #0056b3; color: white; margin-bottom: 15px; }
+    .btn-back { display: block; text-align: center; margin-top: 15px; color: #6c757d; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 style="text-align:center; margin-bottom:15px;">Editar Alumno</h2>
+    <input type="text" id="buscar-carnet" placeholder="Ingrese Carnet a buscar">
+    <button class="btn-search" onclick="buscarAlumno()">Buscar</button>
+
+    <form id="form-editar" style="display:none;">
+      <input type="text" id="carnet" disabled>
+      <input type="text" id="nombres" placeholder="Nombres" required>
+      <input type="text" id="apellidos" placeholder="Apellidos" required>
+      <input type="date" id="fecha_nac">
+      <input type="text" id="carrera" placeholder="Carrera">
+      <input type="email" id="correo" placeholder="Correo">
+      <button type="submit">Actualizar Datos</button>
+    </form>
+    <a href="index.html" class="btn-back">← Volver al Menú</a>
+  </div>
+  <script>
+    async function buscarAlumno() {
+      const carnet = document.getElementById('buscar-carnet').value;
+      const res = await fetch(`/api/estudiantes/${carnet}`);
+      if (!res.ok) return alert('Alumno no encontrado');
+      const data = await res.json();
+      
+      document.getElementById('carnet').value = data.Carnet;
+      document.getElementById('nombres').value = data.Nombres || '';
+      document.getElementById('apellidos').value = data.Apellidos || '';
+      document.getElementById('fecha_nac').value = data.Fecha_nac || '';
+      document.getElementById('carrera').value = data.Carrera || '';
+      document.getElementById('correo').value = data.Correo || '';
+      document.getElementById('form-editar').style.display = 'block';
+    }
+
+    document.getElementById('form-editar').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const carnet = document.getElementById('carnet').value;
+      const alumno = {
+        Nombres: document.getElementById('nombres').value,
+        Apellidos: document.getElementById('apellidos').value,
+        Fecha_nac: document.getElementById('fecha_nac').value,
+        Carrera: document.getElementById('carrera').value,
+        Correo: document.getElementById('correo').value
+      };
+      const res = await fetch(`/api/estudiantes/${carnet}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(alumno)
+      });
+      const data = await res.json();
+      alert(data.message || data.error);
+      if (res.ok) window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
